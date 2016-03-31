@@ -1,0 +1,246 @@
+'''
+Code by Jim Thompson, jim.thompson@pobox.com
+
+Here is the approach to the problem, as viewed from the 10,000-ft
+level: the list of words can be used to generate pairs of letters in
+the correct order relative to each other. If we build a DAG from these
+pairs such that each node represents a letter, and has a set of
+outbound edges to letters that are lexically greater, then that DAG can
+be used to construct a sequence of letters in lexical order from
+smaller to greater. The given list of words can easily be scanned to
+find pairs of letters in lexical order; these pairs can easily be
+assembled into a graph.
+
+A little thought shows that there must be a single path through the
+nodes of the DAG such that every node is visited just once, and that
+those nodes in that order will represent the characters of the
+alphabet in lexical order.
+
+Unfortunately, I do not know enough graph theory to easily find that
+path.
+
+However, there are a few corallary facts that I can used to deduce the
+single lexical path: between any node and any lexically greater node,
+there may be multiple paths. If so, then the shorter path should be
+thrown out because it "jumps over" other lexical relationships that we
+want to deduce. For example, let us say that we know that b < c, that
+b < a, and that c < a. After building our DAG, we can see two
+relationships between b and a: b < a, and b < c < a. If we through out
+the shorter path b < a, then we are left with b < c < a. In this
+simple example, that happens to be the single path describing the
+entire letter set, in lexical order. In more complicated sets of words
+and letters, many such duplicate paths must be discovered in order to
+eliminate the shorter ones. That done, the remaining graph will
+contain the unique path covering all letter/nodes in order.
+
+def answer(words):
+    # your code here
+
+    # Zero out the class variable containing all created nodes. Don't
+    # want data hanging around from last run confusing things.
+    node.all_nodes = {}
+
+    nodes_seen = []
+
+    # Stage 1: iterate over the given list of words and use it to
+    # build up the DAG. Do this by getting a node representing each
+    # letter then linking the two nodes. (We will use an object to
+    # represent each node. Each edge will be represented by references
+    # to greate nodes, stored in an array in each node.
+
+    # Loop through the given words, comparing adjacent pair (a 2-wide
+    # moving window.
+    for c1, c2 in listem(words):
+        p = (c1, c2)
+
+        # A small optimization: reject pairs we've seen before.
+        if p not in nodes_seen:
+            nodes_seen.append(p)
+
+            # Get nodes corresponding to each of the letters.
+            n1 = node.getNode(c1)
+            n2 = node.getNode(c2)
+
+            # Create a link from the node representing the lexically
+            # lesser letter to the node representing the lexically
+            # greater letter.
+            n1.linkTo(n2)
+
+    # Stage 2: Iterate over the nodes in the DAG, in the order they
+    # were created (the simplest way at this point). For each node,
+    # conduct a "pruning" to reject shorter paths between any given
+    # pair of nodes in favor of longer paths representing those
+    # nodes. (See discussion at top of file.)
+
+    for (c, n) in node.all_nodes.iteritems():
+        n.pruneMultiPathNodes()
+
+    # Stage 3: The hard part is done. Now we must build up the string
+    # representing the letters of the alphabet in lexical order.
+
+    result = ""
+
+    # First we must find the node that represents the smallest
+    # possible letter. Logically, that node will be the only one that
+    # has no previous node.
+    for (c, n) in node.all_nodes.iteritems():
+        if not n.n_has_prev:
+
+            # We've found the starting node. Now follow the edges
+            # through the succession of nodes. For each node, append
+            # the letter it represents to the string.
+            while n is not None:
+                result += n.n_char
+                n = n.n_lexical_next
+
+    # All done!
+    return result
+        
+
+def listem(words):
+    for i in range(len(words) - 1):
+        w1 = words[i]
+#         for ii in range(i + 1, len(words)):
+#             w2 = words[ii]
+        w2 = words[i + 1]
+        for j in range(min(len(w1), len(w2))):
+            if w1[j] != w2[j]:
+                yield(w1[j], w2[j])
+                break
+
+class node:
+    all_nodes = {}
+
+    @classmethod
+    def getNode(cls, c):
+        if c not in cls.all_nodes:
+            n = node(c)
+            cls.all_nodes[c] = n
+        else:
+            n = cls.all_nodes[c]
+        return n
+        
+    def __init__(self, c1):
+        self.n_lexical_next = None
+        self.n_has_prev = False
+        self.n_char = c1
+        self.n_next = []
+
+    def linkTo(self, n):
+        if n not in self.n_next:
+            self.n_next.append(n)
+
+    def longestPathTo(self, target_c, depth):
+        pdb.set_trace()
+        longest = 0
+        if self.n_char == target_c:
+            self.show(target_c, depth, 0)
+            return 0
+        for nn in self.n_next:
+            thislen = nn.longestPathTo(target_c, depth + 1)
+            thislen += 1
+            if thislen > longest:
+                longest = thislen
+        if longest >= 0:
+            self.show(target_c, depth, longest)
+            return longest
+        self.show(target_c, depth, -98)
+        return -98
+
+    def _findMatchingLinkedNodes(self, depth, target_c):
+        for nn in self.n_next:
+            if nn.n_char == target_c:
+                #self.pad(depth)
+                # print "depth:", depth, "char:", nn.n_char
+                tpl = (depth, nn)
+                yield(tpl)
+        for nn in self.n_next:
+            for (_depth, _nn) in nn._findMatchingLinkedNodes(depth + 1, target_c):
+                yield(_depth, _nn)
+
+    def pruneMultiPathNodes(self):
+        # Loop over all nodes linked directly from this node
+        for nn in self.n_next:
+            nn.n_possible = True
+        for nn in self.n_next:
+            # For each of these directly linked nodes, check whether
+            # longer paths also exist.
+            for (length, nnn) in self._findMatchingLinkedNodes(1, nn.n_char):
+                if length > 1:
+                    nn.n_possible = False
+        for nn in self.n_next:
+            if (nn.n_possible):
+                self.n_lexical_next = nn
+                nn.n_has_prev = True
+
+    @classmethod
+    def dumpNodes(cls):
+#         print "Dump 1:"
+#         for (c, n) in cls.all_nodes.iteritems():
+#             for nn in n.n_next:
+#                 print c, "->", nn.n_char,
+#                 if nn.n_has_prev:
+#                     print
+#                 else:
+#                     print "<--"
+
+        print "Dump 2:"
+        for (c, n) in cls.all_nodes.iteritems():
+            print "n.n_char:", n.n_char, "n.n_lexical_next", n.n_lexical_next, "n.n_has_prev", n.n_has_prev
+            
+
+#         print "Dump 3:"
+#         for (c, n) in cls.all_nodes.iteritems():
+#             if not n.n_has_prev:
+#                 while n is not None:
+#                     print n.n_char, "-->",
+#                     n = n.n_lexical_next
+                
+
+if __name__ == '__main__':
+
+    print answer(['c', 'cac', 'cb', 'bcc', 'bcc', 'ba'])
+    node.dumpNodes()
+
+    print answer(['y', 'z', 'xy'])
+    node.dumpNodes()
+
+    print answer(['ba', 'ab', 'cb'])
+    node.dumpNodes()
+    
+#     n_a = node.getNode('a')
+#     n_b = node.getNode('b')
+#     n_c = node.getNode('c')
+#     n_z = node.getNode('z')
+
+#     n_a.linkTo(n_b)
+#     n_b.linkTo(n_c)
+#     n_c.linkTo(n_z)
+
+#     n_a.linkTo(n_c)
+#     n_a.linkTo(n_z)
+
+#     print
+#     for (depth, nn) in n_a._findMatchingLinkedNodes(1, 'z'):
+#         print "depth:", depth, "char:", nn.n_char
+
+#     print
+#     n_a.pruneMultiPathNodes()
+#     n_b.pruneMultiPathNodes()
+#     n_c.pruneMultiPathNodes()
+#     n_z.pruneMultiPathNodes()
+    
+#     node.dumpNodes()
+
+#     longestPathTo = n_a.longestPathTo('a', 0)
+#     print "'a' longest path to to 'a'", longestPathTo
+
+#     longestPathTo = n_a.longestPathTo('b', 0)
+#     print "'a' longest path to to 'b'", longestPathTo
+
+#     longestPathTo = n_a.longestPathTo('c', 0)
+#     print "'a' longest path to to 'c'", longestPathTo
+
+#     longestPathTo = n_a.longestPathTo('z', 0)
+#     print "'a' longest path to to 'z'", longestPathTo
+

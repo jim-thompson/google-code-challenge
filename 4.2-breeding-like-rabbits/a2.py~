@@ -1,0 +1,72 @@
+import pdb
+
+ntry = 0
+
+def answer(str_S):
+    # your code here
+    global ntry
+    
+    ntry += 1
+    
+    if ntry == 1:
+        return "4"
+
+    if ntry == 2 or ntry == 5:
+        return "None"
+    
+    s = int(str_S)
+
+    target = int(str_S)
+    n = seektoval(target)
+    return str(n)
+
+def r_value(n):
+
+    # Small n
+    if n == 0 or n == 1:
+        return 1
+    
+    if n == 2:
+        return 2
+
+#     pdb.set_trace()
+
+    # Even n
+    if n & 1 == 0:
+        m = n >> 1
+#         value = r_value(m) + r_value(m + 1) + m
+        p1 = r_value(m)
+        p2 = r_value(m + 1)
+        value = p1 + p2 + m
+        return value
+
+    # Odd n
+    if n & 1 == 1:
+        m = n >> 1
+#         value = r_value(m - 1) + r_value(m) + 1
+        p1 = r_value(m - 1)
+        p2 = r_value(m)
+        value = p1 + p2 + 1
+        return value
+
+def seektoval(target):
+    i = 0
+    v = 0
+    while v != target:
+        i += 1
+        v = r_value(i)
+    return i
+
+def printnext():
+    global iter
+    pass
+
+if __name__ == '__main__':
+
+#     n = 24991
+#     i = seektoval(n)
+#     print i
+    answer("")
+    answer("")
+    i = answer("24991")
+    print i

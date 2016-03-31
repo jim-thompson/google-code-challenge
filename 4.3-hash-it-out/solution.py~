@@ -1,0 +1,28 @@
+# Author: Jim Thompson, jim.thompson@pobox.com
+
+# Create and populate an array to contain the inverse of the y = 129 * x operation. 
+
+invmap = list(range(256))
+
+for i in range(256):
+    v = (i * 129) & 255
+    invmap[v] = i
+
+def answer(digest):
+    # your code here
+    message = list(range(len(digest)))
+    prevmessageoctet = 0
+    for i in range(len(digest)):
+        message[i] = invmap[(prevmessageoctet ^ digest[i])]
+        prevmessageoctet = message[i]
+    return message
+
+if __name__ == '__main__':
+    
+    digest = [0, 129, 3, 129, 7, 129, 3, 129, 15, 129, 3, 129, 7, 129, 3, 129]
+    message = answer(digest)
+    print message
+
+    digest = [0, 129, 5, 141, 25, 137, 61, 149, 113, 145, 53, 157, 233, 185, 109, 165]
+    message = answer(digest)
+    print message

@@ -1,0 +1,25 @@
+r = [1, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ]
+
+def generate_even(n):
+    if (n > 1):
+        value = r[n] + r[n + 1]
+        r[2 * n] = value
+    else:
+        value = r[2 * n]
+    return value
+
+def generate_odd(n):
+    if (n >= 1):
+        value = r[n - 1] + r[n] + 1
+        r[(2 * n) + 1] = value
+    else:
+        value = r[2 * n]
+    return value
+
+def generate_pair(n):
+    return (generate_even(n), generate_odd(n))
+
+for n in range(10):
+    (o, e) = generate_pair(n)
+    print n, o
+    print n, e

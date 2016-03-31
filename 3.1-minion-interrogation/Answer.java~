@@ -1,0 +1,22 @@
+package com.google.challenges; 
+
+public class Answer {   
+  public static int[] answer(int[][] minions) { 
+
+    // Your code goes here.
+    for (int[] minion : minions) {
+      System.out.println("time: " + minion[0] + ", num: " + minion[1] + ", den: " + minion[2]);
+    }
+
+    return minions[0];
+  }
+
+  public static void main(String[] args) {
+    int[] data0 = { 1, 2, 3 };
+    int[] data1 = { 2, 4, 6 };
+    int[][] data2 = { data0, data1 };
+    int[][] data3 = {{ 1, 2, 3 }, { 2, 4, 6 }};
+
+    answer(data3);
+  }
+}

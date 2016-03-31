@@ -1,0 +1,51 @@
+package com.google.challenges;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.text.*;
+ 
+class Answer {
+
+  static Comparator<String> bunnyNameComparator = new Comparator<String>() {
+    public int compare(String o1, String o2) {
+      return o1.compareTo(o2);
+    }
+
+    int stringVal(String s) {
+      StringCharacterIterator iter = new StringCharacterIterator(s);
+
+      System.out.println("Char: " + iter.next());
+
+      return 0;
+    }
+  };
+ 
+  public static void main(String[] args) {
+ 
+    String[] input1 = { "a", "ab", "abc" };
+    printStrings(input1);
+ 
+    Arrays.sort(input1, bunnyNameComparator);
+    printStrings(input1);
+ 
+    String[] input2 = { "annie", "bonnie", "liz" };
+    printStrings(input2);
+ 
+    Arrays.sort(input2, new StringComparator());	
+    printStrings(input2);
+ 
+    String[] input3 = { "abcdefg", "vi" };
+    printStrings(input3);
+ 
+    Arrays.sort(input3, new StringComparator());	
+    printStrings(input3);
+  }
+ 
+  public static void printStrings(String[] strings){
+    for(String d: strings)
+      System.out.print(d + " " );
+ 
+    System.out.println();
+  }
+}      
+      }
